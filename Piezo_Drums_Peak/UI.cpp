@@ -1,8 +1,6 @@
-#include "Arduino.h"
+
 #include "UI.h"
-#include <Wire.h>
-#include "SSD1306Ascii.h"
-#include "SSD1306AsciiWire.h"
+#include "UI.h"
 #include "Settings.h"
 // 0X3C+SA0 - 0x3C or 0x3D
 #define I2C_ADDRESS 0x3C
@@ -16,26 +14,126 @@ UI::UI()
     {
         _ledTimers[i] = millis();
     }
+
+    for (int i = 0; i < PADNUM; i++)
+    {
+        pinMode(_selectedLeds[i], OUTPUT);
+    }
+
+    pinMode(ROT_A, INPUT);
+    pinMode(ROT_B, INPUT);
+    pinMode(ROT_SW, INPUT);
+    //call updateEncoder() when any high/low changed seen
+    //on interrupt 0 (pin 2), or interrupt 1 (pin 3)
 }
 
 void UI::updateUI()
 {
 
-    //LED
+    //PWM leds timers
     for (int i = 0; i < PADNUM; i++)
     {
         if (millis() >= _ledTimers[i] + _ledDuration[i])
         {
-            analogWrite(_leds[i], 0);
+            analogWrite(_pwmLeds[i], 0);
         }
     }
 }
 
 void UI::cueLED(int pad, int vel)
 {
-    analogWrite(_leds[pad], 10 + vel * 0.3);
+    analogWrite(_pwmLeds[pad], 10 + vel * 0.3);
     _ledDuration[pad] = 2 + vel * 0.75;
     _ledTimers[pad] = millis();
+}
+
+void UI::switchPressed(int i, int menu, int value)
+{
+
+    if (menu == 1)
+    {
+        _turnOtherLedsOff(i);
+        digitalWrite(_selectedLeds[i], HIGH);
+        if (menu != _selectedMenu || i != UI::currentSelectedIndex)
+        {
+            _oled.clear();
+            _oled.set2X();
+            // first row
+            _oled.print("P");
+            _oled.print(i + 1);
+            _oled.println(" -NOTE- ");
+        }
+    }
+    else if (menu == 2)
+    {
+        _turnOtherLedsOff(i);
+        digitalWrite(_selectedLeds[i], HIGH);
+        if (menu != _selectedMenu || i != UI::currentSelectedIndex)
+        {
+            _oled.clear();
+            _oled.set2X();
+            // first row
+            _oled.print("P");
+            _oled.print(i + 1);
+            _oled.println(" -THRESH-");
+        }
+    }
+    else if (menu == 3)
+    {
+        _turnOtherLedsOff(i);
+        digitalWrite(_selectedLeds[i], HIGH);
+        if (menu != _selectedMenu || i != UI::currentSelectedIndex)
+        {
+            _oled.clear();
+            _oled.set2X();
+            // first row
+            _oled.print("P");
+            _oled.print(i + 1);
+            _oled.println(" -SENSIT-");
+        }
+    }
+    else if (menu == 4)
+    {
+        _turnOtherLedsOff(i);
+        digitalWrite(_selectedLeds[i], HIGH);
+        if (menu != _selectedMenu || i != UI::currentSelectedIndex)
+        {
+            _oled.clear();
+            _oled.set2X();
+            // first row
+            _oled.print("P");
+            _oled.print(i + 1);
+            _oled.println(" -READu-");
+        }
+    }
+    else if (menu == 5)
+    {
+        _turnOtherLedsOff(i);
+        digitalWrite(_selectedLeds[i], HIGH);
+        if (menu != _selectedMenu || i != UI::currentSelectedIndex)
+        {
+            _oled.clear();
+            _oled.set2X();
+            // first row
+            _oled.print("P");
+            _oled.print(i + 1);
+            _oled.println(" -DEBUN-");
+        }
+    }
+    // second row
+    _oled.clearToEOL();
+    _oled.set2X();
+    _oled.println(value);
+    UI::currentSelectedIndex = i;
+    _selectedMenu = menu;
+}
+
+void UI::turnOffLedsAndReturnHome()
+{
+    _selectedMenu = -1;
+    currentSelectedIndex = -1;
+    _turnOtherLedsOff(-1);
+    _homeScreen();
 }
 
 void UI::oledSetup()
@@ -50,18 +148,45 @@ void UI::oledSetup()
 #endif // RST_PIN >= 0
 
     _oled.setFont(Adafruit5x7);
+    _homeScreen();
+}
 
-    uint32_t m = micros();
+void UI::setOled(char *prop, int value)
+{
     _oled.clear();
+    _oled.set2X();
     // first row
-    _oled.println("set1X jose");
+    _oled.print(UI::currentSelectedIndex);
+    _oled.print(" -> ");
+    _oled.println(prop);
+    // second row
+
+    _oled.println(value);
+}
+
+void UI::_homeScreen()
+{
+    _oled.clear();
+    _oled.set1X();
+    // first row
+    _oled.println("");
 
     // second row
     _oled.set2X();
-    _oled.println("set2X jose");
+    _oled.println("Hola Jose!");
+}
 
-    // third row
-    _oled.set1X();
-    _oled.print("micros: ");
-    _oled.print(micros() - m);
+void UI::_turnOtherLedsOff(int ledON)
+{
+
+    for (int i = 0; i < PADNUM; i++)
+    {
+        if (i != ledON)
+        {
+            digitalWrite(_selectedLeds[i], LOW);
+            _selLedOn[i] = false;
+
+            //turn off all leds but led [i]
+        }
+    }
 }
