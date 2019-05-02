@@ -1,51 +1,39 @@
+# 1 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+# 1 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
 
-#include <Wire.h>
-#include "SSD1306Ascii.h"
-#include "SSD1306AsciiWire.h"
-#include <MIDI.h>
-#include "Settings.h"
-#include "UI.h"
-#include "Pad.h"
-#include "enums.h"
-#include "Switch.h"
-#include "Encoder.h"
-#include <EEPROM.h>
+# 3 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 4 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 5 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 6 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 7 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 8 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 9 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 10 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 11 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 12 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
+# 13 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino" 2
 
 ////Debug mmacros///
 
 //Commet/uncomment next Line To toggle Serial Or MIDIç
 
 //#define DEBUG
+# 34 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+midi::MidiInterface<HardwareSerial> MIDI((HardwareSerial&)Serial);;;
 
-#ifdef DEBUG
-
-#define PRINT(x) Serial.println(x)
-#define SEND_ON(x, y, z)
-#define SEND_OFF(x, y, z)
-
-#else
-
-#define PRINT(x)
-#define SEND_ON(x, y, z) MIDI.sendNoteOn(x, y, z)
-#define SEND_OFF(x, y, z) MIDI.sendNoteOff(x, y, z)
-
-#endif
-
-MIDI_CREATE_DEFAULT_INSTANCE();
-
-Pad pad[PADNUM];
+Pad pad[3];
 
 int minVel = 1; //min velocity sent
-bool noteOn[MIDI_RANGE];
+bool noteOn[128];
 
-unsigned long noteOnDuration[MIDI_RANGE];
+unsigned long noteOnDuration[128];
 int currentRead;
 
 int currentSelectedPad = -1;
 unsigned long selectePadTimer = 0;
 uint8_t currentPadMenu = 0;
 uint8_t prog = 0;
-Switch switches[PADNUM];
+Switch switches[3];
 Switch encoderSW;
 Encoder encoder;
 
@@ -54,47 +42,38 @@ UI ui;
 void setup()
 {
   ///CHANGE IF MORE PADS ARE INCORPARATED
-  pad[0].analogPin = ANALOG_0;
-  pad[1].analogPin = ANALOG_1;
-  pad[2].analogPin = ANALOG_2;
+  pad[0].analogPin = 0;
+  pad[1].analogPin = 1;
+  pad[2].analogPin = 2;
 
-  pad[0].swPin = T_SW_0;
-  pad[1].swPin = T_SW_1;
-  pad[2].swPin = T_SW_2;
+  pad[0].swPin = 5;
+  pad[1].swPin = 17 /*A3*/;
+  pad[2].swPin = 4;
   //END CHANGE
 
-  pinMode(ROT_A, INPUT);
-  pinMode(ROT_B, INPUT);
+  pinMode(3, 0x0);
+  pinMode(2, 0x0);
 
-  attachInterrupt(digitalPinToInterrupt(ROT_A), encoderA, LOW);
+  attachInterrupt(((3) == 2 ? 0 : ((3) == 3 ? 1 : -1)), encoderA, 0x0);
 
   //MIDI_CHANNEL_OFF: disregard incoming messages (MIDI_CHANNEL_OMNI to listen to al channels)
-  MIDI.begin(MIDI_CHANNEL_OFF);
+  MIDI.begin(17 /* and over*/);
   Serial.begin(115200); // set serial output rate
   startArrays();
   ui.oledSetup();
 
-  for (int i = 0; i < PADNUM; i++)
+  for (int i = 0; i < 3; i++)
   {
-    pinMode(pad[i].swPin, INPUT_PULLUP);
+    pinMode(pad[i].swPin, 0x2);
   }
-
-#ifdef RESTORE_SETTINGS
-  for (int i = 0; i < PADNUM; i++)
-  {
-    for (int j = 0; j < PROGNUM; j++)
-    {
-      savePad(i, j);
-    }
-  }
-#endif
+# 91 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
   loadPads();
 }
 
 void loop()
 {
 
-  for (int i = 0; i < PADNUM; i++)
+  for (int i = 0; i < 3; i++)
   {
     readAnalog(i);
   }
@@ -116,7 +95,7 @@ void readAnalog(int i)
 
   if (currentRead > pad[i].settings[prog].threshold && pad[i].enabled)
   {
-    PRINT(currentRead);
+    ;
     if (!pad[i].reading)
     {
       pad[i].reading = true;
@@ -142,7 +121,7 @@ void readAnalog(int i)
 
   if (!pad[i].enabled && pad[i].reading && currentRead <= pad[i].settings[prog].threshold)
   {
-    PRINT("PIEZO AT ZERO");
+    ;
     pad[i].debounceTimer = millis();
     pad[i].reading = false;
     pad[i].enabled = true;
@@ -152,15 +131,15 @@ void readAnalog(int i)
 void filterAndSend(int hittedPad)
 {
 
-  PRINT("AREA: ");
-  PRINT(pad[hittedPad].maxRead);
+  ;
+  ;
 
   int vel = 1 + pad[hittedPad].slope * (pad[hittedPad].maxRead - pad[hittedPad].settings[prog].threshold);
   if (vel > 127)
     vel = 127;
 
-  PRINT("SENT: ");
-  PRINT(vel);
+  ;
+  ;
 
   sendData(hittedPad, vel);
 }
@@ -169,7 +148,7 @@ void sendData(int i, int vel)
 {
   cueNoteOff(pad[i].settings[prog].note);
   Serial.flush();
-  SEND_ON(pad[i].settings[prog].note, vel, 1);
+  MIDI.sendNoteOn(pad[i].settings[prog].note, vel, 1);
   ui.cueLED(i, vel);
 }
 
@@ -179,7 +158,7 @@ void cueNoteOff(int note)
   //Send note off if it was already playing befere cueing a note
   if (noteOn[note])
   {
-    SEND_OFF(note, 0, 1);
+    MIDI.sendNoteOff(note, 0, 1);
   }
   noteOnDuration[note] = millis();
   noteOn[note] = true;
@@ -189,26 +168,26 @@ void checkTimers()
 {
 
   //NOTES ON
-  for (int i = 0; i < MIDI_RANGE; i++)
+  for (int i = 0; i < 128; i++)
   {
     if (noteOn[i])
     {
       //Send note off if note has been on for NOTE_DURATION miliseconds
-      if (millis() >= noteOnDuration[i] + NOTE_DURATION)
+      if (millis() >= noteOnDuration[i] + 120)
       {
         noteOn[i] = false;
-        SEND_OFF(i, 0, 1);
+        MIDI.sendNoteOff(i, 0, 1);
       }
     }
   }
 
   //PAD currentSelectedPad
-  for (int i = 0; i < PADNUM; i++)
+  for (int i = 0; i < 3; i++)
   {
-    if (millis() >= selectePadTimer + SEL_LED_DURATION && currentSelectedPad != -1)
+    if (millis() >= selectePadTimer + 5000 && currentSelectedPad != -1)
     {
       currentSelectedPad = -1;
-      detachInterrupt(digitalPinToInterrupt(ROT_A));
+      detachInterrupt(((3) == 2 ? 0 : ((3) == 3 ? 1 : -1)));
       ui.turnOffLedsAndReturnHome();
     }
   }
@@ -338,7 +317,7 @@ void resetEncoder()
 void startArrays()
 {
 
-  for (int i = 0; i < PADNUM; i++)
+  for (int i = 0; i < 3; i++)
   {
     pad[i].debounceTimer = millis();
     pad[i].reading = false;
@@ -355,7 +334,7 @@ void calcSlope(int i)
 void checkInput()
 {
   //Pad Switches (with debounce)
-  for (int i = 0; i < PADNUM; i++)
+  for (int i = 0; i < 3; i++)
   {
     int swRead = digitalRead(pad[i].swPin);
 
@@ -363,23 +342,23 @@ void checkInput()
     {
       switches[i].debounceTimer = millis();
     }
-    if ((millis() - switches[i].debounceTimer) > DEBOUNCE)
+    if ((millis() - switches[i].debounceTimer) > 50)
     {
       if (swRead != switches[i].currentState)
       {
         switches[i].currentState = swRead;
 
-        if (switches[i].currentState == LOW && i != currentSelectedPad)
+        if (switches[i].currentState == 0x0 && i != currentSelectedPad)
         {
-          attachInterrupt(digitalPinToInterrupt(ROT_A), encoderA, LOW);
+          attachInterrupt(((3) == 2 ? 0 : ((3) == 3 ? 1 : -1)), encoderA, 0x0);
           selectePadTimer = millis();
           currentSelectedPad = i;
           currentPadMenu = 1;
           ui.switchPressed(i, currentPadMenu, pad[i].settings[prog].note, prog);
         }
-        else if (switches[i].currentState == LOW && i == currentSelectedPad)
+        else if (switches[i].currentState == 0x0 && i == currentSelectedPad)
         {
-          attachInterrupt(digitalPinToInterrupt(ROT_A), encoderA, LOW);
+          attachInterrupt(((3) == 2 ? 0 : ((3) == 3 ? 1 : -1)), encoderA, 0x0);
           selectePadTimer = millis();
           currentSelectedPad = i;
           currentPadMenu++;
@@ -410,22 +389,22 @@ void checkInput()
     switches[i].lastState = swRead;
   }
 
-  int rotSWRead = digitalRead(ROT_SW);
+  int rotSWRead = digitalRead(13);
 
   if (rotSWRead != encoderSW.lastState)
   {
     encoderSW.debounceTimer = millis();
   }
-  if ((millis() - encoderSW.debounceTimer) > DEBOUNCE)
+  if ((millis() - encoderSW.debounceTimer) > 50)
   {
     if (rotSWRead != encoderSW.currentState)
     {
       encoderSW.currentState = rotSWRead;
-      if (encoderSW.currentState == HIGH)
+      if (encoderSW.currentState == 0x1)
       {
 
         prog++;
-        if (prog >= PROGNUM)
+        if (prog >= 2)
         {
           prog = 0;
         }
@@ -439,18 +418,18 @@ void checkInput()
 
 void savePad(int i, int prog)
 {
-  int address = sizeof(PadSettings) * (i * PROGNUM + prog);
+  int address = sizeof(PadSettings) * (i * 2 + prog);
   //Serial.println(address);
   EEPROM.put(address, pad[i].settings[prog]);
 }
 
 void loadPads()
 {
-  for (int i = 0; i < PADNUM; i++)
+  for (int i = 0; i < 3; i++)
   {
-    for (int j = 0; j < PROGNUM; j++)
+    for (int j = 0; j < 2; j++)
     {
-      int address = sizeof(PadSettings) * (i * PROGNUM + j);
+      int address = sizeof(PadSettings) * (i * 2 + j);
       EEPROM.get(address, pad[i].settings[j]);
     }
   }
@@ -459,10 +438,10 @@ void loadPads()
 void clearPads()
 {
   //PAD currentSelectedPad
-  for (int i = 0; i < PADNUM; i++)
+  for (int i = 0; i < 3; i++)
   {
     currentSelectedPad = -1;
-    detachInterrupt(digitalPinToInterrupt(ROT_A));
+    detachInterrupt(((3) == 2 ? 0 : ((3) == 3 ? 1 : -1)));
   }
   ui.turnLedsOff();
 }
@@ -475,7 +454,7 @@ void encoderA()
   // If interrupts come faster than 5ms, assume it's a bounce and ignore
   if (interruptTime - lastInterruptTime > 3)
   {
-    if (digitalRead(ROT_B) == LOW)
+    if (digitalRead(2) == 0x0)
     {
       encoder.position--; // Could be -5 or -10
       encoder.direction = -1;

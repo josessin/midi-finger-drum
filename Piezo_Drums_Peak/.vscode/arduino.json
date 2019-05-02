@@ -1,7 +1,8 @@
 {
     "board": "arduino:avr:nano",
     "configuration": "cpu=atmega328",
-    "port": "COM11",
+    "port": "COM4",
+    "output": "../build",
     "programmer": "AVRISP mkII",
     "sketch": "Piezo_Drums_Peak.ino"
 }

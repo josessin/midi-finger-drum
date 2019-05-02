@@ -1,3 +1,6 @@
+#include <Arduino.h>
+#line 1 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+#line 1 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
 
 #include <Wire.h>
 #include "SSD1306Ascii.h"
@@ -51,6 +54,39 @@ Encoder encoder;
 
 UI ui;
 
+#line 54 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void setup();
+#line 94 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void loop();
+#line 108 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void readAnalog(int i);
+#line 152 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void filterAndSend(int hittedPad);
+#line 168 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void sendData(int i, int vel);
+#line 176 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void cueNoteOff(int note);
+#line 188 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void checkTimers();
+#line 217 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void manageMenus();
+#line 332 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void resetEncoder();
+#line 338 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void startArrays();
+#line 350 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void calcSlope(int i);
+#line 355 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void checkInput();
+#line 440 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void savePad(int i, int prog);
+#line 447 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void loadPads();
+#line 459 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void clearPads();
+#line 470 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
+void encoderA();
+#line 54 "d:\\Project MIDI\\Piezo_Drums_Peak\\Piezo_Drums_Peak.ino"
 void setup()
 {
   ///CHANGE IF MORE PADS ARE INCORPARATED
@@ -492,3 +528,4 @@ void encoderA()
   // Keep track of when we were here last (no more than every 5ms)
   lastInterruptTime = interruptTime;
 }
+
